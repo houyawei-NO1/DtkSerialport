@@ -2,7 +2,7 @@
 #include <DMainWindow>
 #include <DWidgetUtil>
 #include <DApplicationSettings>
-
+#include <dtkserialport.h>
 DWIDGET_USE_NAMESPACE
 
 int main(int argc, char *argv[])
@@ -24,10 +24,13 @@ int main(int argc, char *argv[])
     DApplicationSettings as;
     Q_UNUSED(as)
 
-    DMainWindow w;
-    w.show();
+   // DMainWindow w;
+   //w.show();
 
-    Dtk::Widget::moveToCenter(&w);
+
+    DtkSerialport d;
+    d.show();
+   // Dtk::Widget::moveToCenter(&w);
 
     return a.exec();
 }
