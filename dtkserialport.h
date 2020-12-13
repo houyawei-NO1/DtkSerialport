@@ -1,0 +1,4 @@
+#ifndef DTKSERIALPORT_H
+#define DTKSERIALPORT_H
+
+#endif // DTKSERIALPORT_H
