@@ -1,4 +1,4 @@
-QT += core gui dtkwidget
+QT += core gui dtkwidget serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,3 +15,8 @@ RESOURCES +=         resources.qrc
 
 HEADERS += \
     dtkserialport.h
+
+DISTFILES += \
+    hyw.ico
+
+RC_ICONS = hyw.ico
