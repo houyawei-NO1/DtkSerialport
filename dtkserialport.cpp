@@ -18,10 +18,18 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    QVBoxLayout *vlayout =new QVBoxLayout(w);
    DLineEdit *sendLineEdit = new DLineEdit;
    DTextEdit *messageBox = new DTextEdit;
+   QHBoxLayout *hlayout = new QHBoxLayout(w);
    DPushButton *sendButton = new DPushButton;
    DLabel *status = new DLabel;
    status->setAlignment(Qt::AlignCenter);
    status->setText("尚未连接");
+   DComboBox *inputAppend= new DComboBox;
+   inputAppend->addItem("输入内容无追加");
+   inputAppend->addItem("CR");
+   inputAppend->addItem("LF");
+   inputAppend->addItem("CR/LF");
+   DPushButton *question = new DPushButton;
+   question->setText("?");
    sendButton->setText("发送");
    DComboBox *setting1= new DComboBox;
    setting1->addItem("/dev/ttyUSB0");
@@ -48,8 +56,12 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    layout->addLayout(vlayout,0,8,10,3);
    vlayout->addWidget(status);
    vlayout->addWidget(sendLineEdit);
+   vlayout->addLayout(hlayout);
+   hlayout->addWidget(inputAppend);
+   hlayout->addWidget(question);
    vlayout->addWidget(sendButton);
    vlayout->addSpacing(40);
+  // vlayout->addStretch();
    vlayout->addWidget(setting1);
    vlayout->addWidget(setting2);
    vlayout->addWidget(setting3);
@@ -58,6 +70,14 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
 
 
    //setLayout(layout);
+
+   //question button
+   connect(question,&DPushButton::clicked,this,[](){
+       DDialog dlg("解惑", "CR（Carriage Return）表示回车；LF（Line Feed）表示换行；Dos和Windows采用回车+换行（CR+LF）表示下一行；而UNIX/Linux采用换行符（LF）表示下一行；苹果机(MAC OS系统)则采用回车符（CR）表示下一行。\\r 是回车，return;  \\n 是换行，newline");
+       dlg.addButton("好的", true, DDialog::ButtonWarning);
+       dlg.setIcon(QIcon(":/images/hyw.ico"));
+       dlg.exec();
+   });
 
     //在标题栏添加控件（其实可以把标题栏看成一个Widget,详细的说明请看文档) Add a control to the title bar (In fact, the title bar can be regarded as a Widget. Please refer to the document for detailed instructions.)
     DSearchEdit *searchEdit = new DSearchEdit;
@@ -72,7 +92,7 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
     connect(action, &QAction::triggered, this, []() {
         DDialog dlg("并没有", "想啥呢，我自己啥都不会还彩蛋");
         dlg.addButton("好吧", true, DDialog::ButtonWarning);
-        dlg.setIcon(QIcon::fromTheme("你以为的不是你以为的"));
+        dlg.setIcon(QIcon(":/images/hyw.ico"));
         dlg.exec();
     });
     titlebar()->setMenu(menu);
@@ -123,7 +143,26 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
       //send
       connect(sendButton, &DPushButton::clicked, this, [ = ] {
           QString data = sendLineEdit->text();
+          qInfo()<<inputAppend->currentIndex();
           QByteArray sendArray = data.toLatin1();
+          switch(inputAppend->currentIndex()){
+          case 0:
+             //sendArray.append("");
+              break;
+          case 1:
+              sendArray.append("/r");
+              break;
+          case 2:
+              sendArray.append("/n");
+              break;
+          case 3:
+              sendArray.append("/r/n");
+              break;
+          default:
+              //sendArray.append("");
+              break;
+             }
+
           global_port.write(sendArray);
       });
       //receive
