@@ -10,4 +10,14 @@ v0.1完成基本雏形
 
 v0.2发送内容添加回车换行
 
-![运行效果图2](https://github.com/houyawei-NO1/DtkSerialport/blob/master/v0.2.jpg)
+![v0.2运行效果图](https://github.com/houyawei-NO1/DtkSerialport/blob/master/v0.2.jpg)
+
+v0.3发送内容快捷键添加回车，打开串口快捷键Ctrl+O，关闭串口Ctrl+C。
+
+添加指令发送时间
+
+添加清屏按键
+
+接收文本框自动聚焦至文字底部
+
+![v0.2运行效果图](https://github.com/houyawei-NO1/DtkSerialport/blob/master/v0.3.jpg)

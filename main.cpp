@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     DApplication a(argc, argv);
     a.setOrganizationName("deepin");
     a.setApplicationName("dtk串口助手");
-    a.setApplicationVersion("0.2");
+    a.setApplicationVersion("0.3");
     a.setProductIcon(QIcon(":/images/hyw.ico"));
     a.setProductName("DTK串口助手");
     a.setApplicationDescription("这是一个DTK串口助手应用");

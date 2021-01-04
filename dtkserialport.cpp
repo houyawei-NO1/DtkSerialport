@@ -31,6 +31,9 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    DPushButton *question = new DPushButton;
    question->setText("?");
    sendButton->setText("发送");
+   sendButton->setShortcut(Qt::Key_Return);
+   DPushButton *clearText = new DPushButton;
+   clearText->setText("清屏");
    DComboBox *setting1= new DComboBox;
    setting1->addItem("/dev/ttyUSB0");
    setting1->addItem("/dev/ttyUSB1");
@@ -49,8 +52,10 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    setting3->setText("以十六进制形式显示");
    DPushButton *openButton = new DPushButton(w);
    openButton->setText("打开");
+   openButton->setShortcut(QKeySequence::Open);
    DPushButton *closeButton = new DPushButton;
    closeButton->setText("关闭");
+   closeButton->setShortcut(QKeySequence::Close);
 
    layout->addWidget(messageBox,0,0,10,7);
    layout->addLayout(vlayout,0,8,10,3);
@@ -60,6 +65,7 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    hlayout->addWidget(inputAppend);
    hlayout->addWidget(question);
    vlayout->addWidget(sendButton);
+   vlayout->addWidget(clearText);
    vlayout->addSpacing(40);
   // vlayout->addStretch();
    vlayout->addWidget(setting1);
@@ -145,35 +151,47 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
           QString data = sendLineEdit->text();
           qInfo()<<inputAppend->currentIndex();
           QByteArray sendArray = data.toLatin1();
+          global_port.write(sendArray);
           switch(inputAppend->currentIndex()){
           case 0:
              //sendArray.append("");
               break;
           case 1:
-              sendArray.append("/r");
+              global_port.write("\r");
               break;
           case 2:
-              sendArray.append("/n");
+              global_port.write("\n");
               break;
           case 3:
-              sendArray.append("/r/n");
+              global_port.write("\r\n");
               break;
           default:
               //sendArray.append("");
               break;
              }
 
-          global_port.write(sendArray);
+
       });
       //receive
       connect(&global_port,&QSerialPort::readyRead, this, [ = ] {
           QByteArray receiveArray = global_port.readAll();
           qInfo()<<receiveArray;
+          QDateTime current_time = QDateTime::currentDateTime();
+          //QString current_date = current_time.toString("yyyy-MM-dd hh:mm:ss");
+          QString time = current_time.toString("hh:mm:ss");
           if(setting3->checkState() == Qt::Checked)
           messageBox->insertPlainText(QString(receiveArray.toHex()).toUpper().append(' '));
           else
-          messageBox->insertPlainText(QString(receiveArray));
+          messageBox->insertPlainText("\n"+time+"\t"+QString(receiveArray));
+           //messagebox auto scroll
+          messageBox->moveCursor(QTextCursor::End);
+
       });
+
+      //clear text
+      connect(clearText,&DPushButton::clicked, messageBox, &DTextEdit::clear);
+
+
 }
 
 DtkSerialport::~DtkSerialport()

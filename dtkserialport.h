@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QtSerialPort/QSerialPort>
 #include <DDialog>
+#include <QDateTime>
 DWIDGET_USE_NAMESPACE
 #ifndef DTKSERIALPORT_H
 #define DTKSERIALPORT_H
