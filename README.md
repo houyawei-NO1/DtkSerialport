@@ -20,4 +20,6 @@ v0.3发送内容快捷键添加回车，打开串口快捷键Ctrl+O，关闭串�
 
 接收文本框自动聚焦至文字底部
 
-![v0.2运行效果图](https://github.com/houyawei-NO1/DtkSerialport/blob/master/v0.3.jpg)
+![v0.3运行效果图](https://github.com/houyawei-NO1/DtkSerialport/blob/master/v0.3.jpg)
+
+v0.4修复低波特率下文本框回车过多的问题，第一次尝试打包 【DTK串口助手].deb

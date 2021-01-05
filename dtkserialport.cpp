@@ -182,14 +182,16 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
           if(setting3->checkState() == Qt::Checked)
           messageBox->insertPlainText(QString(receiveArray.toHex()).toUpper().append(' '));
           else
-          messageBox->insertPlainText("\n"+time+"\t"+QString(receiveArray));
-           //messagebox auto scroll
+          messageBox->insertPlainText(QString(receiveArray));
+          if (QString(receiveArray)=="\r")
+          messageBox->insertPlainText(time);
           messageBox->moveCursor(QTextCursor::End);
 
       });
 
       //clear text
       connect(clearText,&DPushButton::clicked, messageBox, &DTextEdit::clear);
+
 
 
 }
