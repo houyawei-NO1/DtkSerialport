@@ -12,6 +12,7 @@
 #include <QAction>
 #include <QMessageBox>
 #include <QtSerialPort/QSerialPort>
+#include <QSerialPortInfo>
 #include <DDialog>
 #include <QDateTime>
 DWIDGET_USE_NAMESPACE

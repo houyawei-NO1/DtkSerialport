@@ -11,13 +11,15 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
     //初始化主窗口 Initialize the main window
     setCentralWidget(w);//将w作为窗口的用户部分（整个窗口除了标题栏的部分）
     moveToCenter(this); //把窗口移动到屏幕中间
-    DtkSerialport::resize(630,500); //改变窗口大小应当改变MainWindow的大小
-    DtkSerialport::setMinimumSize(630,500);
+    DtkSerialport::resize(1000,900); //改变窗口大小应当改变MainWindow的大小
+    DtkSerialport::setMinimumSize(1000,900);
 
    QGridLayout* layout = new QGridLayout(w);
    QVBoxLayout *vlayout =new QVBoxLayout(w);
    DLineEdit *sendLineEdit = new DLineEdit;
+   sendLineEdit->setMaximumHeight(100);
    DTextEdit *messageBox = new DTextEdit;
+
    QHBoxLayout *hlayout = new QHBoxLayout(w);
    DPushButton *sendButton = new DPushButton;
    DLabel *status = new DLabel;
@@ -34,12 +36,18 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    sendButton->setShortcut(Qt::Key_Return);
    DPushButton *clearText = new DPushButton;
    clearText->setText("清屏");
+
    DComboBox *setting1= new DComboBox;
-   setting1->addItem("/dev/ttyUSB0");
-   setting1->addItem("/dev/ttyUSB1");
-   setting1->addItem("/dev/ttyUSB2");
-   setting1->addItem("/dev/ttyUSB3");
-   setting1->addItem("/dev/ttyUSB4");
+   foreach (const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts())
+   {
+       setting1->addItem(serialPortInfo.portName());
+   }
+//   setting1->addItem("/dev/ttyUSB0");
+//   setting1->addItem("/dev/ttyUSB1");
+//   setting1->addItem("/dev/ttyUSB2");
+//   setting1->addItem("/dev/ttyUSB3");
+//   setting1->addItem("/dev/ttyUSB4");
+
    DComboBox *setting2= new DComboBox;
    setting2->addItem("115200");
    setting2->addItem("921600");
@@ -56,10 +64,14 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    DPushButton *closeButton = new DPushButton;
    closeButton->setText("关闭");
    closeButton->setShortcut(QKeySequence::Close);
+   DPushButton *refreshButton = new DPushButton;
+   refreshButton->setText("刷新串口列表");
+
 
    layout->addWidget(messageBox,0,0,10,7);
    layout->addLayout(vlayout,0,8,10,3);
    vlayout->addWidget(status);
+    vlayout->addSpacing(40);
    vlayout->addWidget(sendLineEdit);
    vlayout->addLayout(hlayout);
    hlayout->addWidget(inputAppend);
@@ -69,10 +81,12 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    vlayout->addSpacing(40);
   // vlayout->addStretch();
    vlayout->addWidget(setting1);
+   vlayout->addWidget(refreshButton);
    vlayout->addWidget(setting2);
    vlayout->addWidget(setting3);
    vlayout->addWidget(openButton);
    vlayout->addWidget(closeButton);
+
 
 
    //setLayout(layout);
@@ -85,13 +99,12 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
        dlg.exec();
    });
 
-    //在标题栏添加控件（其实可以把标题栏看成一个Widget,详细的说明请看文档) Add a control to the title bar (In fact, the title bar can be regarded as a Widget. Please refer to the document for detailed instructions.)
+
     DSearchEdit *searchEdit = new DSearchEdit;
     titlebar()->setCustomWidget(searchEdit);
     searchEdit->setFixedWidth(200);
     searchEdit->show();
 
-    //在标题栏上添加一个菜单/菜单项 Add a menu/menu item to the title bar
     QMenu *menu=new QMenu;
     QAction *action=new QAction("彩蛋");
     menu->addAction(action);
@@ -111,9 +124,10 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged,this,&DtkSerialport::setTheme);
     system_init();
    // connect(openButton,&DPushButton::clicked,this,&DtkSerialport::openButton_click);
-    //open
+
+    //open button
     connect(openButton, &DPushButton::clicked, this, [ = ] {
-     status->setText("串口已连接");
+
      qInfo()<<setting1->currentText();
      qInfo()<<setting2->currentIndex();
      QString portname =setting1->currentText();
@@ -139,14 +153,26 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
         global_port.setBaudRate(QSerialPort::Baud4800);
          break;
         }
-     global_port.open(QIODevice::ReadWrite);
+     if(global_port.open(QIODevice::ReadWrite))
+
+     {
+         QSerialPortInfo SerialInfo(portname);
+         //status->setText("串口已连接");
+         QString Info = "串  口  已  连  接\n\n"+SerialInfo.portName()+"\n"+SerialInfo.description()+"\n"+SerialInfo.manufacturer()+"\n"+SerialInfo.serialNumber()+"\n"+SerialInfo.systemLocation();
+         status->setText(Info);
+     }
+     else
+         status->setText("无法连接至有效串口");
+
      });
-     //close
+
+     //close button
       connect(closeButton, &DPushButton::clicked, this, [ = ] {
-          status->setText("已断开连接");
+          status->setText("");
       global_port.close();
       });
-      //send
+
+      //send button
       connect(sendButton, &DPushButton::clicked, this, [ = ] {
           QString data = sendLineEdit->text();
           qInfo()<<inputAppend->currentIndex();
@@ -168,11 +194,11 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
           default:
               //sendArray.append("");
               break;
-             }
-
+             }          
 
       });
-      //receive
+
+      //receive button
       connect(&global_port,&QSerialPort::readyRead, this, [ = ] {
           QByteArray receiveArray = global_port.readAll();
           qInfo()<<receiveArray;
@@ -180,17 +206,32 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
           //QString current_date = current_time.toString("yyyy-MM-dd hh:mm:ss");
           QString time = current_time.toString("hh:mm:ss");
           if(setting3->checkState() == Qt::Checked)
-          messageBox->insertPlainText(QString(receiveArray.toHex()).toUpper().append(' '));
+          messageBox->insertPlainText(QString(receiveArray.toHex()).toUpper());
           else
+          {
           messageBox->insertPlainText(QString(receiveArray));
           if (QString(receiveArray)=="\r")
           messageBox->insertPlainText(time);
+          }
           messageBox->moveCursor(QTextCursor::End);
 
       });
 
       //clear text
       connect(clearText,&DPushButton::clicked, messageBox, &DTextEdit::clear);
+
+      //refresh button
+       connect(refreshButton, &DPushButton::clicked, this, [ = ] {
+           //serialport list refresh
+           setting1->removeItem(0);
+           setting1->removeItem(1);
+           setting1->removeItem(2);
+           foreach (const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts())
+           {
+               setting1->addItem(serialPortInfo.portName());
+           }
+
+       });
 
 
 
