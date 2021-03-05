@@ -24,9 +24,16 @@ v0.3发送内容快捷键添加回车，打开串口快捷键Ctrl+O，关闭串�
 
 v0.4修复低波特率下文本框回车过多的问题，第一次尝试打包 【DTK串口助手].deb
 
-![v0.5运行效果图](https://github.com/houyawei-NO1/DtkSerialport/blob/master/v0.5.jpg)
 
 v0.5
 添加自动扫描有效串口
 
 显示串口详细信息
+
+![v0.5运行效果图](https://github.com/houyawei-NO1/DtkSerialport/blob/master/v0.5.jpg)
+
+v0.6
+
+添加日志打印，每50ms向串口逐行发送日志数据
+
+![v0.6运行效果图](https://github.com/houyawei-NO1/DtkSerialport/blob/master/v0.6.jpg)
