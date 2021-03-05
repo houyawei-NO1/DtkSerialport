@@ -15,6 +15,9 @@
 #include <QSerialPortInfo>
 #include <DDialog>
 #include <QDateTime>
+#include <QFile>
+#include <QElapsedTimer>
+#include <QTimer>
 DWIDGET_USE_NAMESPACE
 #ifndef DTKSERIALPORT_H
 #define DTKSERIALPORT_H
@@ -35,6 +38,7 @@ private:
     void system_init();
     //变量
     QSerialPort global_port;
+
 };
 
 #endif // DTKSERIALPORT_H

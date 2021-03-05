@@ -13,12 +13,16 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
     moveToCenter(this); //把窗口移动到屏幕中间
     DtkSerialport::resize(1000,900); //改变窗口大小应当改变MainWindow的大小
     DtkSerialport::setMinimumSize(1000,900);
+    static bool SaveLog=false;
 
    QGridLayout* layout = new QGridLayout(w);
    QVBoxLayout *vlayout =new QVBoxLayout(w);
+   QVBoxLayout *vTextlayout =new QVBoxLayout(w);
+   QHBoxLayout *filelayout = new QHBoxLayout(w);
    DLineEdit *sendLineEdit = new DLineEdit;
    sendLineEdit->setMaximumHeight(100);
    DTextEdit *messageBox = new DTextEdit;
+   DTextEdit *filemessageBox = new DTextEdit;
 
    QHBoxLayout *hlayout = new QHBoxLayout(w);
    DPushButton *sendButton = new DPushButton;
@@ -68,17 +72,26 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    refreshButton->setText("刷新串口列表");
 
 
-   layout->addWidget(messageBox,0,0,10,7);
+   DPushButton *saveButton = new DPushButton(w);
+   saveButton->setText("保存日志");
+   DPushButton *readButton = new DPushButton;
+   readButton->setText("向串口发送日志");
+
+
+   layout->addLayout(vTextlayout,0,0,10,7);
+   vTextlayout->addWidget(messageBox,7);
+   vTextlayout->addWidget(filemessageBox,3);
    layout->addLayout(vlayout,0,8,10,3);
+   vlayout->addStretch(1);
    vlayout->addWidget(status);
-    vlayout->addSpacing(40);
+   vlayout->addStretch(1);
    vlayout->addWidget(sendLineEdit);
    vlayout->addLayout(hlayout);
    hlayout->addWidget(inputAppend);
    hlayout->addWidget(question);
    vlayout->addWidget(sendButton);
    vlayout->addWidget(clearText);
-   vlayout->addSpacing(40);
+   vlayout->addStretch(1);
   // vlayout->addStretch();
    vlayout->addWidget(setting1);
    vlayout->addWidget(refreshButton);
@@ -86,6 +99,11 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    vlayout->addWidget(setting3);
    vlayout->addWidget(openButton);
    vlayout->addWidget(closeButton);
+   vlayout->addStretch(1);
+   vlayout->addLayout(filelayout);
+   filelayout->addWidget(saveButton);
+   filelayout->addWidget(readButton);
+   vlayout->addStretch(1);
 
 
 
@@ -125,11 +143,13 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
     system_init();
    // connect(openButton,&DPushButton::clicked,this,&DtkSerialport::openButton_click);
 
+
     //open button
     connect(openButton, &DPushButton::clicked, this, [ = ] {
-
-     qInfo()<<setting1->currentText();
-     qInfo()<<setting2->currentIndex();
+     openButton->setDisabled(true);
+     closeButton->setEnabled(true);
+//     qInfo()<<setting1->currentText();
+//     qInfo()<<setting2->currentIndex();
      QString portname =setting1->currentText();
      global_port.setPortName(setting1->currentText());
 
@@ -168,8 +188,10 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
 
      //close button
       connect(closeButton, &DPushButton::clicked, this, [ = ] {
-          status->setText("");
-      global_port.close();
+          openButton->setEnabled(true);
+          closeButton->setDisabled(true);
+          status->setText("串口连接已断开");
+          global_port.close();
       });
 
       //send button
@@ -201,7 +223,7 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
       //receive button
       connect(&global_port,&QSerialPort::readyRead, this, [ = ] {
           QByteArray receiveArray = global_port.readAll();
-          qInfo()<<receiveArray;
+//          qInfo()<<receiveArray;
           QDateTime current_time = QDateTime::currentDateTime();
           //QString current_date = current_time.toString("yyyy-MM-dd hh:mm:ss");
           QString time = current_time.toString("hh:mm:ss");
@@ -210,6 +232,18 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
           else
           {
           messageBox->insertPlainText(QString(receiveArray));
+          if(SaveLog==true)
+            {
+              QFile file("logsave.txt");
+              if (file.open(QIODevice::Append | QIODevice::Text))
+              {
+
+                 file.write(receiveArray);
+                 file.write("\n");
+                 file.flush();
+                 file.close();
+              }
+          }
           if (QString(receiveArray)=="\r")
           messageBox->insertPlainText(time);
           }
@@ -223,16 +257,79 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
       //refresh button
        connect(refreshButton, &DPushButton::clicked, this, [ = ] {
            //serialport list refresh
-           setting1->removeItem(0);
-           setting1->removeItem(1);
-           setting1->removeItem(2);
+           for (int index = 10;index >=0; index--) {
+
+               setting1->removeItem(index);
+
+           }
+
            foreach (const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts())
            {
+
                setting1->addItem(serialPortInfo.portName());
            }
 
        });
 
+       //read button 将log文件内容按行发送给已连接串口
+        connect(readButton, &DPushButton::clicked, this, [ = ] {
+
+            QFile file("log.txt");
+            static bool send_file = true,first_push = true;
+             if(send_file==true&&first_push==true)
+             {
+                 first_push = false;
+                 readButton->setText("取消发送");
+             }
+            else if(send_file==true&&first_push==false)
+            {
+            readButton->setText("恢复向串口发送日志");
+            send_file=false;
+            }
+            else
+            {
+            readButton->setText("取消发送");
+            send_file=true;
+            }
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                if(send_file==false) return;
+                 while (!file.atEnd() && send_file == true)
+                 {
+                   QByteArray line = file.readLine();
+                   qDebug()<<"本次向串口发送的内容为："<<line;
+                   filemessageBox->insertPlainText("\n本次向串口发送的内容为：");
+                   filemessageBox->insertPlainText(QString(line.toHex())+"\n");
+                   filemessageBox->moveCursor(QTextCursor::End);
+                   global_port.write(line);
+//                   global_port.write("\n");
+//                   QElapsedTimer t;
+//                   t.start();
+//                   while(t.elapsed()<1000);
+                   QEventLoop loop;
+                   QTimer::singleShot(50,&loop,SLOT(quit()));
+                   loop.exec();
+                 }
+                   file.close();
+            }
+
+        });
+
+
+        //savebutton 保存串口打印日志
+          connect(saveButton, &DPushButton::clicked, this, [ = ] {
+              if(SaveLog==false)
+              {
+                SaveLog=true;
+                saveButton->setText("取消保存");
+              }
+              else
+              {
+                SaveLog=false;
+                saveButton->setText("保存日志");
+              }
+
+          });
 
 
 }
