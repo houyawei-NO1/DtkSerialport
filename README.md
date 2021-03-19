@@ -1,6 +1,9 @@
 # DtkSerialport
 
-## 正在学习DTK中
+## DTK学习
+
+### 这是一个使用DTK/QT写的串口助手工具
+
 v0.1完成基本雏形
 
 
