@@ -298,10 +298,14 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
                  {
                    QByteArray line = file.readLine();
                    qDebug()<<"本次向串口发送的内容为："<<line;
-                   filemessageBox->insertPlainText("\n本次向串口发送的内容为：");
-                   filemessageBox->insertPlainText(QString(line.toHex())+"\n");
+                   qDebug()<<"本次向串口发送的内容为原始数据："<<QByteArray::fromHex(line);
+                   filemessageBox->insertPlainText("\n本次向串口发送的内容为(hex)：");
+//                   filemessageBox->insertPlainText(QString(line.toHex()));
+                   filemessageBox->insertPlainText(line);
+//                   filemessageBox->insertPlainText("\n本次向串口发送的内容为(原始数据)：");
+//                   filemessageBox->insertPlainText(QByteArray::fromHex(line));
                    filemessageBox->moveCursor(QTextCursor::End);
-                   global_port.write(line);
+                   global_port.write(QByteArray::fromHex(line));
 //                   global_port.write("\n");
 //                   QElapsedTimer t;
 //                   t.start();
