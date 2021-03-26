@@ -74,6 +74,17 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
 
    DPushButton *saveButton = new DPushButton(w);
    saveButton->setText("保存日志");
+   DComboBox *sendtime= new DComboBox;
+   sendtime->addItem("0ms");
+   sendtime->addItem("30");
+   sendtime->addItem("35");
+   sendtime->addItem("40");
+   sendtime->addItem("45");
+   sendtime->addItem("50");
+   sendtime->addItem("55");
+   sendtime->addItem("60");
+   sendtime->addItem("65");
+   sendtime->addItem("70");
    DPushButton *readButton = new DPushButton;
    readButton->setText("向串口发送日志");
 
@@ -102,6 +113,7 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    vlayout->addStretch(1);
    vlayout->addLayout(filelayout);
    filelayout->addWidget(saveButton);
+   filelayout->addWidget(sendtime);
    filelayout->addWidget(readButton);
    vlayout->addStretch(1);
 
@@ -297,6 +309,7 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
                  while (!file.atEnd() && send_file == true)
                  {
                    QByteArray line = file.readLine();
+                   int time =sendtime->currentText().toInt();
                    qDebug()<<"本次向串口发送的内容为："<<line;
                    qDebug()<<"本次向串口发送的内容为原始数据："<<QByteArray::fromHex(line);
                    filemessageBox->insertPlainText("\n本次向串口发送的内容为(hex)：");
@@ -310,8 +323,9 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
 //                   QElapsedTimer t;
 //                   t.start();
 //                   while(t.elapsed()<1000);
+                   qDebug()<<"time"<<time;
                    QEventLoop loop;
-                   QTimer::singleShot(50,&loop,SLOT(quit()));
+                   QTimer::singleShot(time,&loop,SLOT(quit()));
                    loop.exec();
                  }
                    file.close();
