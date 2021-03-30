@@ -88,6 +88,10 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    sendtime->addItem("65");
    sendtime->addItem("70");
    sendtime->addItem("100");
+   sendtime->addItem("150");
+   sendtime->addItem("200");
+   sendtime->addItem("300");
+   sendtime->addItem("400");
    sendtime->addItem("500");
    sendtime->addItem("1000");
    DPushButton *readButton = new DPushButton;
@@ -348,7 +352,7 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
                    QTimer::singleShot(time,&loop,SLOT(quit()));
                    loop.exec();
                  }
-                 readButton->setText("发送结束");
+//                 readButton->setText("发送结束");
                    file.close();
             }
 
