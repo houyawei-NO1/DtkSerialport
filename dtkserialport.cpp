@@ -54,12 +54,14 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
 
    DComboBox *setting2= new DComboBox;
    setting2->addItem("115200");
+   setting2->addItem("941176");
    setting2->addItem("921600");
    setting2->addItem("57600");
    setting2->addItem("38400");
    setting2->addItem("19200");
    setting2->addItem("9600");
    setting2->addItem("4800");
+   setting2->addItem("1000000");
    DCheckBox *setting3=new DCheckBox;
    setting3->setText("以十六进制形式显示");
    DPushButton *openButton = new DPushButton(w);
@@ -85,6 +87,9 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
    sendtime->addItem("60");
    sendtime->addItem("65");
    sendtime->addItem("70");
+   sendtime->addItem("100");
+   sendtime->addItem("500");
+   sendtime->addItem("1000");
    DPushButton *readButton = new DPushButton;
    readButton->setText("向串口发送日志");
 
@@ -170,16 +175,29 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
         global_port.setBaudRate(QSerialPort::Baud115200);
          break;
      case 1:
-        global_port.setBaudRate(921600);
+        global_port.setBaudRate(941176);
          break;
      case 2:
-        global_port.setBaudRate(QSerialPort::Baud57600);
+        global_port.setBaudRate(921600);
          break;
      case 3:
-        global_port.setBaudRate(QSerialPort::Baud19200);
+        global_port.setBaudRate(QSerialPort::Baud57600);
          break;
      case 4:
+        global_port.setBaudRate(QSerialPort::Baud38400);
+         break;
+     case 5:
+        global_port.setBaudRate(QSerialPort::Baud19200);
+         break;
+     case 6:
         global_port.setBaudRate(QSerialPort::Baud9600);
+         break;
+     case 7:
+        global_port.setBaudRate(QSerialPort::Baud4800);
+        qDebug()<<"4800";
+         break;
+     case 8:
+        global_port.setBaudRate(1000000);
          break;
      default:
         global_port.setBaudRate(QSerialPort::Baud4800);
@@ -265,6 +283,8 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
 
       //clear text
       connect(clearText,&DPushButton::clicked, messageBox, &DTextEdit::clear);
+      connect(clearText,&DPushButton::clicked, filemessageBox, &DTextEdit::clear);
+
 
       //refresh button
        connect(refreshButton, &DPushButton::clicked, this, [ = ] {
@@ -295,7 +315,7 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
              }
             else if(send_file==true&&first_push==false)
             {
-            readButton->setText("恢复向串口发送日志");
+            readButton->setText("恢复发送");
             send_file=false;
             }
             else
@@ -328,6 +348,7 @@ DtkSerialport::DtkSerialport(DMainWindow *parent)
                    QTimer::singleShot(time,&loop,SLOT(quit()));
                    loop.exec();
                  }
+                 readButton->setText("发送结束");
                    file.close();
             }
 
