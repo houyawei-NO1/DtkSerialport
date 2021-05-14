@@ -4,6 +4,8 @@
 
 ### 这是一个使用DTK/QT写的串口助手工具
 
+https://github.com/houyawei-NO1/DtkSerialport
+
 v0.1完成基本雏形
 
 
